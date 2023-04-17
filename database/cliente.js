@@ -26,4 +26,13 @@ const Cliente = connection.define("cliente", {
   }
 })
 
+// Associação 1:1 (One-to-One)
+const Endereco = require("./endereco");
+
+// Cliente tem endereco
+// Endereco ganha uma chava estrangeira (nome do modal + Id)
+// Chave estrangeira = clienteId
+Cliente.hasOne(Endereco); // CLiente tem um Enredeço
+Endereco.belongsTo(Cliente); // Endereço pertence a um cliente
+
 module.exports = Cliente;
