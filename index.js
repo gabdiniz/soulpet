@@ -11,6 +11,8 @@ const { connection, authenticate } = require("./database/database");
 authenticate(connection); // efetivar conexão
 const Cliente = require("./database/cliente"); // configura model da aplicação
 const Endereco = require("./database/endereco");
+const Pet = require("./database/pet");
+
 
 app.get("/clientes", async (req, res) => {
   const listaClientes = await Cliente.findAll();
@@ -79,6 +81,79 @@ app.delete("/clientes/:id", async (req, res) => {
   catch (e) {
     console.log(e);
     res.status(500).json({ message: "Um erro ocorreu" });
+  }
+})
+
+app.get("/pets", async (req, res) => {
+  try {
+    const listaPets = await Pet.findAll();
+    res.json(listaPets);
+  }
+  catch (e) {
+    res.status(500).json({ message: "Um erro ocorreu." })
+  }
+})
+
+app.get("/pets/:id", async (req, res) => {
+  const { id } = req.params;
+  const pet = await Pet.findByPk(id);
+  if (pet) {
+    res.json(pet)
+  }
+  else {
+    res.status(404).json({ message: "Pet não encontrado"});
+  }
+})
+
+app.post("/pets", async (req, res) => {
+  const { nome, tipo, porte, dataNasc, clienteId } = req.body;
+  try {
+    const cliente = await Cliente.findOne({ where: { id: clienteId }});
+    if (cliente) {
+      const novo = await Pet.create({ nome, tipo, porte, dataNasc, clienteId });
+      res.status(201).json(novo);
+    }
+    else {
+      res.status(404).json("Cliente não encontrado.");
+    }
+  }
+  catch (e) {
+    res.status(500).json({ message: "Ocorreu um erro." })
+  }
+})
+
+app.put("/pets/:id", async (req, res) => {
+  const { nome, tipo, porte, dataNasc, clienteId } = req.body;
+  const { id } = req.params;
+  const pet = await Pet.findOne({ where: { id } })
+  try {
+    if (pet) {
+      await pet.update({ nome, tipo, porte, dataNasc, clienteId })
+      res.status(200).json("Pet editado.");
+    }
+    else {
+      res.status(404).json({ message: "Pet não encontrado." })
+    }
+  }
+  catch (e) {
+    res.status(500).json("Um erro ocorreu.");
+  }
+})
+
+app.delete("/pets/:id", async (req, res) => {
+  const { id } = req.params;
+  const pet = await Pet.findOne({ where: { id } });
+  try {
+    if (pet) {
+      await pet.destroy();
+      res.status(200).json("Pet removido.");
+    }
+    else {
+      res.status(404).json({ message: "Pet não encontrado. " });
+    }
+  }
+  catch (e) {
+    res.status(500).json({ message: "Ocorreu um erro." })
   }
 })
 
