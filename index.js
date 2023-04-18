@@ -20,9 +20,9 @@ app.get("/clientes", async (req, res) => {
 app.get("/clientes/:id", async (req, res) => {
   const cliente = await Cliente.findOne({
     where: { id: req.params.id },
-    include: [Endereco]    
+    include: [Endereco]
   });
-  (cliente) ? res.json(cliente) : res.status(404).json({message: "Cliente não encontrado"})
+  (cliente) ? res.json(cliente) : res.status(404).json({ message: "Cliente não encontrado" })
 })
 
 //Definição de rotas
@@ -42,6 +42,45 @@ app.post("/clientes", async (req, res) => {
   }
 });
 
+app.put("/clientes/:id", async (req, res) => {
+  const { nome, email, telefone, endereco } = req.body;
+  const { id } = req.params;
+  try {
+    const cliente = await Cliente.findOne({ where: { id } })
+    if (cliente) {
+      if (endereco) {
+        await Endereco.update(endereco, { where: { clienteId: id } });
+      }
+      await cliente.update({ nome, email, telefone });
+      res.status(200).json({ message: "Cliente editado." })
+    }
+    else {
+      res.status(500).json({ message: "Cliente não encontrado." });
+    }
+  }
+  catch (e) {
+    console.log(e)
+    res.status(500).json({ message: "Ocorreu um erro." });
+  }
+})
+
+app.delete("/clientes/:id", async (req, res) => {
+  const { id } = req.params;
+  const cliente = await Cliente.findOne({ where: { id } });
+  try {
+    if (cliente) {
+      await cliente.destroy();
+      res.status(200).json("Cliente removido");
+    }
+    else {
+      res.status(404).json({ message: "Cliente não encontrado!" });
+    }
+  }
+  catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Um erro ocorreu" });
+  }
+})
 
 // Escuta de eventos (listen)
 app.listen(3000, () => {
