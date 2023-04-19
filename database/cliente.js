@@ -3,12 +3,12 @@
 
 
 // DataTypes = serve para definir qual o tipo da coluna
-const {DataTypes} = require("sequelize");
-const {connection} = require("./database");
+const { DataTypes } = require("sequelize");
+const { connection } = require("./database");
 
 const Cliente = connection.define("cliente", {
   // Configurar a coluna 'nome'
-  nome: { 
+  nome: {
     // nome VARCHAR NOT NULL
     type: DataTypes.STRING,
     allowNull: false,
@@ -33,11 +33,12 @@ const Pet = require("./pet");
 // Cliente tem endereco
 // Endereco ganha uma chava estrangeira (nome do modal + Id)
 // Chave estrangeira = clienteId
-Cliente.hasOne(Endereco); // CLiente tem um Enredeço
+Cliente.hasOne(Endereco, { onDelete: "CASCADE" }); // CLiente tem um Enredeço
 Endereco.belongsTo(Cliente); // Endereço pertence a um cliente
+// CASCADE = apagar o cliente, faz com que o endereço associado seja apagado junto
 
 // Relacionamento 1:N (Um cliente pode ter N pets)
-Cliente.hasMany(Pet)
+Cliente.hasMany(Pet, { onDelete: "CASCADE" })
 Pet.belongsTo(Cliente); // Um pet pertence a um cliente
 
 module.exports = Cliente;
